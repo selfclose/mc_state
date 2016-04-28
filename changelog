@@ -1,0 +1,32 @@
+2013-03-09
+* added check.php
+
+2013-03-08
+* avatars are now optional and not longer served by the server but added on the client side trough js
+
+2013-03-07
+* fixed some grammar/spelling mistakes
+
+2013-03-06
+* added avatar support
+
+2013-02-22
+* changed readme
+
+2013-02-21
+* added 2 mob images
+* deleted 2 mob images
+* added mob image credits
+* added changelog
+
+2013-02-20
+* added block image credits
+
+2013-02-17
+* added 27 block images
+* changed 7 block images
+
+2013-02-11
+* added 10 block images
+* added readme with block image credits ( img/blocks/ )
+* small comment info
