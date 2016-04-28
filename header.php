@@ -97,7 +97,7 @@ $bonus_methods = new bonus_methods();
                 <div class="well nav-collapse sidebar-nav">
                     <ul class="nav nav-tabs nav-stacked main-menu">
                         <li class="nav-header hidden-tablet">Main</li>
-                        <li><a class="ajax-link" href="index.php"><i class="icon-home"></i><span class="hidden-tablet"><?php $trans->getTranslate('dashboard'); ?></span></a></li>
+                        <li><a class="ajax-link" href="index.php"><i class="icon-home"></i><span class="hidden-tablet"> Dashboard</span></a></li>
                         <li><a class="ajax-link" href="players.php"><i class="icon-user"></i><span class="hidden-tablet"> Players</span></a></li>
                         <?php
                         if($bonus_methods->enable_server_page == true){

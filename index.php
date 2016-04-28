@@ -1,6 +1,6 @@
 <?php
 include('header.php');
-include_once('lang.php');
+//include_once('lang.php');
 ?>
 
             <div>
