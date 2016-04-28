@@ -1,18 +1,18 @@
 <?php
 // necessary to work
 $mysql_host = 'localhost'; // your MySQL server IP
-$mysql_user = 'setafonnix'; // your MySQL database user
-$mysql_pass = 'showme'; // your MySQL database password
-$mysql_db = 'sims-craft_state'; // your MySQL database name
+$mysql_user = 'root'; // your MySQL database user
+$mysql_pass = 'root'; // your MySQL database password
+$mysql_db = 'sims-craft_data'; // your MySQL database name
 $mysql_encoding = 'utf8';  // this is recommended because the plugin creates all its tables with latin1 encoding
-$prefix = 'Stats_'; // plugin default is "Stats"
+$prefix = 'stats_'; // plugin default is "Stats"
 
 
 /**
  * Display-specific optional configs
  */
-$page_title = 'Minecraft WEBStatsX';
-$header_title = 'WEBStatsX';
+$page_title = 'Minecraft Pla2Craft';
+$header_title = 'Pla2Craft';
 $top_limit = 10;
 
 
@@ -42,4 +42,5 @@ $custom_links = array(
 
 //--- enable the server stats page [beta]
 $enable_server_page = false; //BETA!! Needs some special rights your webserver might not have on the host system. This will not work on windows servers!
+
 ?>
