@@ -29,7 +29,12 @@
                                     <th>Items crafted</th>
                                 </tr>
                             </thead>
-                            <tbody>    
+                            <tbody>
+                                <tr>
+                                    <td>shit</td>
+                                    <td><?=$bonus_methods->top_limit?></td>
+                                </tr>
+
                             </tbody>
                         </table>
                     </div>
