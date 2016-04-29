@@ -182,6 +182,7 @@ class stats_player extends stats_settings {
     }
 
     public function get_all_kills($top = NULL){
+        var_dump('BLOCK');
         if(empty($top)){
             $res = mysqli_query($this->mysqli, 'SELECT type, amount FROM '.$this->prefix.'kill WHERE player_id = "'.$this->player.'"');
         } else {
@@ -203,8 +204,8 @@ class stats_player extends stats_settings {
 
     //blocks
     public function get_all_blocks($res_type = NULL){
-        var_dump('BLOCK');
-        $res = mysqli_query($this->mysqli, 'SELECT sbo.blockID, q1.amn, q2.brk FROM (SELECT blockID FROM '.$this->prefix.'block WHERE player_id = "'.$this->player.'" GROUP BY blockID ORDER BY blockID asc) as sbo LEFT JOIN (SELECT blockID, SUM(amount) as amn FROM '.$this->prefix.'block WHERE player = "'.$this->player.'" AND break = 0 GROUP BY blockID ORDER BY blockID asc) as q1 ON sbo.blockID = q1.blockID LEFT JOIN (SELECT blockID, SUM(amount) as brk FROM '.$this->prefix.'block WHERE player = "'.$this->player.'" AND break = 1 GROUP BY blockID ORDER BY blockID asc) as q2 ON sbo.blockID = q2.blockID');
+
+        $res = mysqli_query($this->mysqli, 'SELECT sbo.blockID, q1.amn, q2.brk FROM (SELECT blockID FROM '.$this->prefix.'block WHERE player_id = "'.$this->player_id.'" GROUP BY blockID ORDER BY blockID asc) as sbo LEFT JOIN (SELECT blockID, SUM(amount) as amn FROM '.$this->prefix.'block WHERE player_id = "'.$this->player_id.'" AND break = 0 GROUP BY blockID ORDER BY blockID asc) as q1 ON sbo.blockID = q1.blockID LEFT JOIN (SELECT blockID, SUM(amount) as brk FROM '.$this->prefix.'block WHERE player_id = "'.$this->player_id.'" AND break = 1 GROUP BY blockID ORDER BY blockID asc) as q2 ON sbo.blockID = q2.blockID');
 
         if($res_type == 'mysql'){
             return $res;
