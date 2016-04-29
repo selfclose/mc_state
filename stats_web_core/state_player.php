@@ -2,6 +2,7 @@
 
 class stats_player extends stats_settings {
     public $counter;
+    public $player_id;
     public $player;
     public $playtime;
     public $arrows;
@@ -11,6 +12,7 @@ class stats_player extends stats_settings {
     public $damagetaken;
     public $timeskicked;
     public $toolsbroken;
+    public $teleports;
     public $eggsthrown;
     public $itemscrafted;
     public $omnomnom;
@@ -22,9 +24,9 @@ class stats_player extends stats_settings {
 
     function __construct($player){
         parent::__construct();
-        var_dump('player: '.$player);
+//        var_dump('player: '.$player);
         //ทำให้ได้คนมา
-        $res = mysqli_query($this->mysqli, 'SELECT * FROM '.$this->prefix.'player WHERE player = "'.mysqli_real_escape_string($this->mysqli, $player).'"');
+        $res = mysqli_query($this->mysqli, 'SELECT * FROM '.$this->prefix.'player AS player INNER JOIN '.$this->prefix.'players AS players ON player.player_id = players.player_id WHERE name = "'.mysqli_real_escape_string($this->mysqli, $player).'"');
 
         if(mysqli_num_rows($res) < 1){
             echo 'Error! No user with given name "'.$player.'"!';
@@ -32,7 +34,8 @@ class stats_player extends stats_settings {
         } else {
             $row = mysqli_fetch_assoc($res);
             $this->counter = $row['counter'];
-            $this->player = $row['player'];
+            $this->player_id = $row['player_id'];
+            $this->player = $row['name'];
             $this->playtime = $this->convert_playtime($row['playtime']);
             $this->arrows = $row['arrows'];
             $this->xpgained = $row['xpgained'];
@@ -59,6 +62,7 @@ class stats_player extends stats_settings {
             $this->worldchange = $row['worldchange'];
             $this->itemdrops = $row['itemdrops'];
             $this->shear = $row['shear'];
+            var_dump($this->player);
         }
     }
 
@@ -70,13 +74,34 @@ class stats_player extends stats_settings {
         return $days.'d:'.$hours.'h:'.$mins.'m:'.$secs.'s';
     }
 
+    //Every thing WHERE by name, it's not quite safe
+    // MY FUNC
+    public function getSelectSinglePlayerQuery($fields, $table, $where = null, $whereWith)
+    {
+        $sql = 'SELECT ' . $fields . ' FROM ' . $this->prefix.$table. ' AS t1 INNER JOIN ' . $this->prefix.'players as t2 ON t1.player_id = t2.player_id WHERE name = "' . $this->player . '"';
+        if ($where) {
+            $sql .= ' AND ' . $where . ' = "'.$whereWith.'"';
+        }
+        return mysqli_query($this->mysqli, $sql);
+    }
+
+    public function getSumSinglePlayerQuery($sumField, $alias = null, $table)
+    {
+        $sql = 'SELECT SUM(' . $sumField . ') AS ' . ($alias!=null?:' ') . 'FROM ' . $this->prefix.$table. ' AS t1 INNER JOIN ' . $this->prefix.'players as t2 ON t1.player_id = t2.player_id WHERE name = "' . $this->player . '"';
+
+       //$sql = 'SELECT SUM(' . $sumField . ') AS total FROM ' . $this->prefix.$table. ' AS t1 INNER JOIN ' . $this->prefix.'players as t2 ON t1.player_id = t2.player_id WHERE name = "' . $this->player . '"';
+        var_dump($sql.'----');
+        return mysqli_query($this->mysqli, $sql);
+    }
+
+    //---------------------------------------//
     // moving
     public function get_movement($type = 0){
-        var_dump($type);
+        var_dump('getMovement:'.$type);
         if($type > 3 || $type < 0){
             return "Error! No movement of this type exists.";
         } else {
-            $res = mysqli_query($this->mysqli, 'SELECT distance FROM '.$this->prefix.'move WHERE player_id = "'.$this->player.'" AND type = "'.$type.'"');
+            $res = $this->getSelectSinglePlayerQuery('distance', 'move', 'type', $type);
             $row = mysqli_fetch_assoc($res);
 
             if(mysqli_num_rows($res) < 1){
@@ -88,13 +113,15 @@ class stats_player extends stats_settings {
     }
 
     public function get_total_movement(){
-        $res = mysqli_query($this->mysqli, 'SELECT SUM(distance) as dis FROM '.$this->prefix.'move WHERE player_id = "'.$this->player.'"');
+//        $res = mysqli_query($this->mysqli, 'SELECT SUM(distance) as dis FROM '.$this->prefix.'move WHERE player_id = "'.$this->player.'"');
+        $res = $this->getSumSinglePlayerQuery('distance', 'dis', 'move');
         $row = mysqli_fetch_assoc($res);
 
         if(mysqli_num_rows($res) < 1){
             return 0;
-        } else {
+        } else {var_dump('total move'.$row['dis']);
             return $row['dis'];
+
         }
     }
 
@@ -103,6 +130,7 @@ class stats_player extends stats_settings {
         var_dump('death');
         if(empty($cause)){
             $res = mysqli_query($this->mysqli, 'SELECT SUM(amount) as amn FROM '.$this->prefix.'death WHERE player_id = "'.$this->player.'"');
+//            $res = $this->getSumSinglePlayerQuery('amount', 'death');
             //$res = mysqli_query($this->mysqli, 'SELECT SUM(amount) as amn FROM '.$this->prefix.'death WHERE player = "'.$this->player.'"');
         } else {
             $res = mysqli_query($this->mysqli, 'SELECT SUM(amount) as amn FROM '.$this->prefix.'death WHERE player_id = "'.$this->player.'" and cause = "'.$cause.'"');
@@ -121,7 +149,7 @@ class stats_player extends stats_settings {
         if(empty($top)){
             $res = mysqli_query($this->mysqli, 'SELECT cause, amount FROM '.$this->prefix.'death WHERE player_id = "'.$this->player.'"');
         } else {
-            $res = mysqli_query($this->mysqli, 'SELECT cause, amount FROM '.$this->prefix.'death WHERE player_id = "'.$this->player.'" ORDER BY amount desc LIMIT 1');
+            $res = mysqli_query($this->mysqli, 'SELECT cause, amount FROM '.$this->prefix.'death WHERE player_id = "'.$this->player_id.'" ORDER BY amount desc LIMIT 1');
         }
         
         if(mysqli_num_rows($res) <= 0){
@@ -141,9 +169,10 @@ class stats_player extends stats_settings {
     // kills
     public function get_kills($type = NULL){
         if(empty($type)){
-            $res = mysqli_query($this->mysqli, 'SELECT SUM(amount) as amn FROM '.$this->prefix.'kill WHERE player_id = "'.$this->player.'"');
+//            $res = mysqli_query($this->mysqli, 'SELECT SUM(amount) as amn FROM '.$this->prefix.'kill WHERE player_id = "'.$this->player.'"');
+            $res = $this->getSumSinglePlayerQuery('amount', 'amn', 'kill');
         } else {
-            $res = mysqli_query($this->mysqli, 'SELECT SUM(amount) as amn FROM '.$this->prefix.'kill WHERE player_id = "'.$this->player.'" AND type = "'.$type.'"');
+            $res = mysqli_query($this->mysqli, 'SELECT SUM(amount) as amn FROM '.$this->prefix.'kill WHERE player_id = "'.$this->player_id.'" AND type = "'.$type.'"');
         }
 
         $row = mysqli_fetch_assoc($res);
@@ -157,9 +186,9 @@ class stats_player extends stats_settings {
 
     public function get_all_kills($top = NULL){
         if(empty($top)){
-            $res = mysqli_query($this->mysqli, 'SELECT type, amount FROM '.$this->prefix.'kill WHERE player_id = "'.$this->player.'"');
+            $res = mysqli_query($this->mysqli, 'SELECT type, amount FROM '.$this->prefix.'kill WHERE player_id = "'.$this->player_id.'"');
         } else {
-            $res = mysqli_query($this->mysqli, 'SELECT type, amount FROM '.$this->prefix.'kill WHERE player_id = "'.$this->player.'" ORDER BY amount desc LIMIT 1');
+            $res = mysqli_query($this->mysqli, 'SELECT type, amount FROM '.$this->prefix.'kill WHERE player_id = "'.$this->player_id.'" ORDER BY amount desc LIMIT 1');
         }
 
         if(mysqli_num_rows($res) <= 0){
@@ -177,7 +206,8 @@ class stats_player extends stats_settings {
 
     //blocks
     public function get_all_blocks($res_type = NULL){
-        $res = mysqli_query($this->mysqli, 'SELECT sbo.blockID, q1.amn, q2.brk FROM (SELECT blockID FROM '.$this->prefix.'block WHERE player_id = "'.$this->player.'" GROUP BY blockID ORDER BY blockID asc) as sbo LEFT JOIN (SELECT blockID, SUM(amount) as amn FROM '.$this->prefix.'block WHERE player = "'.$this->player.'" AND break = 0 GROUP BY blockID ORDER BY blockID asc) as q1 ON sbo.blockID = q1.blockID LEFT JOIN (SELECT blockID, SUM(amount) as brk FROM '.$this->prefix.'block WHERE player = "'.$this->player.'" AND break = 1 GROUP BY blockID ORDER BY blockID asc) as q2 ON sbo.blockID = q2.blockID');
+
+        $res = mysqli_query($this->mysqli, 'SELECT sbo.blockID, q1.amn, q2.brk FROM (SELECT blockID FROM '.$this->prefix.'block WHERE player_id = "'.$this->player_id.'" GROUP BY blockID ORDER BY blockID asc) as sbo LEFT JOIN (SELECT blockID, SUM(amount) as amn FROM '.$this->prefix.'block WHERE player_id = "'.$this->player_id.'" AND break = 0 GROUP BY blockID ORDER BY blockID asc) as q1 ON sbo.blockID = q1.blockID LEFT JOIN (SELECT blockID, SUM(amount) as brk FROM '.$this->prefix.'block WHERE player_id = "'.$this->player_id.'" AND break = 1 GROUP BY blockID ORDER BY blockID asc) as q2 ON sbo.blockID = q2.blockID');
 
         if($res_type == 'mysql'){
             return $res;

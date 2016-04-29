@@ -3,12 +3,13 @@ class stats_global extends stats_settings {
     private $gp_res = false;
 
     public function get_players($by = NULL, $order = NULL, $limit = NULL){
-        var_dump('get player' . $order);
         if($this->gp_res === false){
+
             if(empty($order)){
-                $s = 'ORDER BY player_id ';
+                $s = 'ORDER BY name ';
             } else {
                 $s = 'ORDER BY '.mysqli_real_escape_string($this->mysqli, $by).' ';
+                //var_dump($s);
             }
 
             if(!empty($order)){
@@ -21,11 +22,13 @@ class stats_global extends stats_settings {
                 $s .= ' LIMIT '.mysqli_real_escape_string($this->mysqli, $limit);
             }
 
-            $this->gp_res = mysqli_query($this->mysqli, 'SELECT player_id FROM '.$this->prefix.'player '.$s);
+            $this->gp_res = mysqli_query($this->mysqli, '
+SELECT name FROM stats_player as play INNER JOIN stats_players as plays ON play.player_id = plays.player_id ORDER BY playtime desc');
         }
 
+        //จ่ายไปให้ construct ของ state_player
         if($row = mysqli_fetch_assoc($this->gp_res)){
-               return new stats_player($row['player_id']);
+               return new stats_player($row['name']);
         } else {
             $this->gp_res = false;
             return false;
@@ -209,7 +212,7 @@ var_dump('fff');
             if(strtotime($row['lastjoin']) > strtotime($row['lastleave'])){
                 $return_arr[$row['player_id']] = 1;
             } else {
-                $return_arr[$row['player_id']] = 0;            
+                $return_arr[$row['player_id']] = 0;
             }
         }
 

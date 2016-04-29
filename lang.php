@@ -29,7 +29,6 @@ class translate
 
 }
 
-$trans = new translate();
 
 //var_dump($trans->getTranslate('topTravel'));
 
