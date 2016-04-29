@@ -22,12 +22,13 @@ class stats_global extends stats_settings {
                 $s .= ' LIMIT '.mysqli_real_escape_string($this->mysqli, $limit);
             }
 
-            $this->gp_res = mysqli_query($this->mysqli, 'SELECT player_id FROM '.$this->prefix.'player '.$s);
+            $this->gp_res = mysqli_query($this->mysqli, '
+SELECT name FROM stats_player as play INNER JOIN stats_players as plays ON play.player_id = plays.player_id ORDER BY playtime desc');
         }
 
         //จ่ายไปให้ construct ของ state_player
         if($row = mysqli_fetch_assoc($this->gp_res)){
-               return new stats_player($row['player_id']);
+               return new stats_player($row['name']);
         } else {
             $this->gp_res = false;
             return false;
