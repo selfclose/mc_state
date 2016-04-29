@@ -24,7 +24,7 @@ class stats_player extends stats_settings {
         parent::__construct();
         var_dump('player: '.$player);
         //ทำให้ได้คนมา
-        $res = mysqli_query($this->mysqli, 'SELECT * FROM '.$this->prefix.'player WHERE player = "'.mysqli_real_escape_string($this->mysqli, $player).'"');
+        $res = mysqli_query($this->mysqli, 'SELECT * FROM '.$this->prefix.'player WHERE player_id = "'.mysqli_real_escape_string($this->mysqli, $player).'"');
 
         if(mysqli_num_rows($res) < 1){
             echo 'Error! No user with given name "'.$player.'"!';
